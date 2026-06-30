@@ -84,6 +84,18 @@ export async function POST(req: Request) {
       estDist *= 2
     }
 
+    const tollMap: Record<string, number> = {
+      'paris-versailles': 0,     'paris-annecy': 70,       'paris-la baule': 55,
+      'paris-avignon': 95,       'paris-bruxelles': 25,     'paris-saint-émilion': 75,
+      'paris-lyon': 65,          'lyon-annecy': 20,         'paris-nantes': 50,
+      'marseille-toulouse': 45,  'lyon-marseille': 35,      'paris-marseille': 90,
+      'paris-lille': 20,         'bordeaux-toulouse': 25,
+    }
+    let peages_cost = tollMap[key1] || tollMap[key2] || 0
+    if (aller_retour) {
+      peages_cost *= 2
+    }
+
     const devisResult = calculer_devis_stub({
       nb_passagers,
       date_depart,
@@ -91,6 +103,7 @@ export async function POST(req: Request) {
       distance_km: estDist,
       type_vehicule: 'Standard',
       options: [],
+      peages_cost,
     })
     const { prix_ht, tva, prix_ttc } = devisResult
 
@@ -156,7 +169,8 @@ Voici le devis calculé pour votre voyage de groupe :
   "trajetLabel": "${origine} → ${destination}${aller_retour ? ' (aller-retour)' : ''}",
   "subLabel": "${date_depart.split('-').reverse().join('/')} · ${nb_passagers} passagers · ${aller_retour ? 'Aller-retour' : 'Aller simple'}",
   "rows": [
-    { "label": "Transport de base (${estDist} km)", "value": "${prix_ht.toFixed(2)} € HT" },
+    { "label": "Transport de base (${estDist} km)", "value": "${(estDist * 2.5).toFixed(2)} € HT" },
+    ${peages_cost > 0 ? `{ "label": "Frais de péages d'autoroute", "value": "${peages_cost.toFixed(2)} € HT" },` : ''}
     { "label": "TVA 10%", "value": "${tva.toFixed(2)} €" }
   ],
   "total": "${prix_ttc.toFixed(2)} € TTC",

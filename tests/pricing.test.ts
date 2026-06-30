@@ -124,4 +124,30 @@ describe('calculer_devis_stub — pricing formula', () => {
     })
     expect(r1.prix_ttc).toBe(r2.prix_ttc)
   })
+
+  // ── Toll calculations ───────────────────────────────────────────────────
+
+  it('incorporates peages_cost in the HT total and appends a line item if > 0', () => {
+    const result = calculer_devis_stub({
+      ...BASE_PARAMS,
+      distance_km: 100,
+      peages_cost: 50,
+    })
+
+    // Base: 100 × 2.5 = 250 HT. Tolls: 50 HT. Total HT = 300.
+    expect(result.prix_ht).toBe(300)
+    // TVA: 300 × 0.1 = 30.
+    expect(result.tva).toBe(30)
+    // TTC: 300 + 30 = 330.
+    expect(result.prix_ttc).toBe(330)
+
+    // Lines check: Base transport, Tolls, TVA
+    expect(result.lignes).toHaveLength(3)
+    expect(result.lignes[0].libelle).toContain('100 km')
+    expect(result.lignes[0].montant).toBe(250)
+    expect(result.lignes[1].libelle).toContain("péages d'autoroute")
+    expect(result.lignes[1].montant).toBe(50)
+    expect(result.lignes[2].libelle).toContain('TVA 10%')
+    expect(result.lignes[2].montant).toBe(30)
+  })
 })

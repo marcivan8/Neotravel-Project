@@ -26,6 +26,9 @@ export const call_calculer_devis = tool({
       .enum(['Standard', 'Grand tourisme'])
       .default('Standard'),
     options: z.array(z.enum(['Guide', 'Nuit chauffeur', 'Péages'])).default([]),
+    origine: z.string().optional().describe('Origin city name'),
+    destination: z.string().optional().describe('Destination city name'),
+    aller_retour: z.boolean().optional().describe('True if round-trip'),
   }),
   execute: async (params) => {
     try {
@@ -50,6 +53,26 @@ export const call_calculer_devis = tool({
         }
       }
 
+      // ── Lookup tolls ──
+      let peages_cost = 0
+      if (params.origine && params.destination) {
+        const tollMap: Record<string, number> = {
+          'paris-versailles': 0,     'paris-annecy': 70,       'paris-la baule': 55,
+          'paris-avignon': 95,       'paris-bruxelles': 25,     'paris-saint-émilion': 75,
+          'paris-lyon': 65,          'lyon-annecy': 20,         'paris-nantes': 50,
+          'marseille-toulouse': 45,  'lyon-marseille': 35,      'paris-marseille': 90,
+          'paris-lille': 20,         'bordeaux-toulouse': 25,
+        }
+        const o = params.origine.trim().toLowerCase()
+        const d = params.destination.trim().toLowerCase()
+        const key1 = `${o}-${d}`
+        const key2 = `${d}-${o}`
+        peages_cost = tollMap[key1] || tollMap[key2] || 0
+        if (params.aller_retour) {
+          peages_cost *= 2
+        }
+      }
+
       // ── Call pricing engine ──
       const result = calculer_devis_stub({
         nb_passagers:   params.nb_passagers,
@@ -58,6 +81,7 @@ export const call_calculer_devis = tool({
         distance_km:    params.distance_km,
         type_vehicule:  params.type_vehicule,
         options:        params.options,
+        peages_cost,
       })
 
       console.log(

@@ -50,6 +50,20 @@ export default async function DevisPage({ params }: PageProps) {
     optionsStr = devisData.options.join(', ')
   }
 
+  const paxCount = devisData.nb_passagers || 1
+  const priceTtc = devisData.devis.prix_ttc
+  const costPerPerson = Math.round((priceTtc / paxCount) * 100) / 100
+
+  const getTarificationType = (dateDepart: string) => {
+    if (!dateDepart) return 'Standard'
+    const month = new Date(dateDepart).getMonth() + 1
+    if ([5, 6, 7, 8, 9, 12].includes(month)) {
+      return 'Saison Haute 📈'
+    }
+    return 'Saison Basse 📉'
+  }
+  const pricingType = getTarificationType(devisData.date_depart)
+
   return (
     <div style={{ background: '#f5f5f3', minHeight: '100vh', padding: '32px 16px' }}>
       
@@ -254,16 +268,24 @@ export default async function DevisPage({ params }: PageProps) {
 
         {/* Pricing Summary */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 32 }}>
-          <div style={{ width: 280 }}>
-            <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
+          <div style={{ width: 340 }}>
+            <table style={{ width: '100%', fontSize: 13.5, borderCollapse: 'collapse' }}>
               <tbody>
                 <tr>
-                  <td style={{ padding: '8px 0', color: '#666' }}>Total HT :</td>
-                  <td style={{ padding: '8px 0', textAlign: 'right', fontFamily: 'monospace', fontWeight: 500 }}>{devisData.devis.prix_ht.toFixed(2)} €</td>
+                  <td style={{ padding: '6px 0', color: '#616b57' }}>Type de tarification :</td>
+                  <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600, color: '#2e3a1f' }}>{pricingType}</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #eceadf' }}>
+                  <td style={{ padding: '6px 0 10px', color: '#616b57' }}>Moyen par passager :</td>
+                  <td style={{ padding: '6px 0 10px', textAlign: 'right', fontWeight: 700, color: '#0f5c3a' }}>{costPerPerson.toFixed(2)} € TTC</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '8px 0', color: '#666', borderBottom: '1px solid #eceadf' }}>TVA (10%) :</td>
-                  <td style={{ padding: '8px 0', textAlign: 'right', fontFamily: 'monospace', fontWeight: 500, borderBottom: '1px solid #eceadf' }}>{devisData.devis.tva.toFixed(2)} €</td>
+                  <td style={{ padding: '8px 0 6px', color: '#666', paddingTop: 10 }}>Total HT :</td>
+                  <td style={{ padding: '8px 0 6px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 500, paddingTop: 10 }}>{devisData.devis.prix_ht.toFixed(2)} €</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '6px 0', color: '#666', borderBottom: '1px solid #eceadf' }}>TVA (10%) :</td>
+                  <td style={{ padding: '6px 0', textAlign: 'right', fontFamily: 'monospace', fontWeight: 500, borderBottom: '1px solid #eceadf' }}>{devisData.devis.tva.toFixed(2)} €</td>
                 </tr>
                 <tr style={{ fontSize: 16, fontWeight: 700, color: '#2e3a1f' }}>
                   <td style={{ padding: '12px 0' }}>Total TTC :</td>
