@@ -33,6 +33,11 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# documents & compile artifacts
+*.pdf
+*.html
+*.docx
+
 # vercel
 .vercel
 
