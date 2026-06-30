@@ -50,19 +50,8 @@ export default async function DevisPage({ params }: PageProps) {
     optionsStr = devisData.options.join(', ')
   }
 
-  const paxCount = devisData.nb_passagers || 1
-  const priceTtc = devisData.devis.prix_ttc
-  const costPerPerson = Math.round((priceTtc / paxCount) * 100) / 100
-
-  const getTarificationType = (dateDepart: string) => {
-    if (!dateDepart) return 'Standard'
-    const month = new Date(dateDepart).getMonth() + 1
-    if ([5, 6, 7, 8, 9, 12].includes(month)) {
-      return 'Saison Haute 📈'
-    }
-    return 'Saison Basse 📉'
-  }
-  const pricingType = getTarificationType(devisData.date_depart)
+  const costPerPerson = devisData.devis.cout_par_personne ?? (Math.round((devisData.devis.prix_ttc / (devisData.nb_passagers || 1)) * 100) / 100)
+  const pricingType = devisData.devis.type_tarification ?? 'Saison Basse 📉'
 
   return (
     <div style={{ background: '#f5f5f3', minHeight: '100vh', padding: '32px 16px' }}>
