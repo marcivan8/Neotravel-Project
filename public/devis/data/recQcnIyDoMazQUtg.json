@@ -1,0 +1,33 @@
+{
+  "demande_id": "recViwWWwsdc2A0wM",
+  "prospect_nom": "Prospect Web",
+  "prospect_email": "prospect-demo@neotravel.fr",
+  "origine": "Paris",
+  "destination": "Lyon",
+  "date_depart": "2026-07-29",
+  "nb_passagers": 45,
+  "distance_km": 465,
+  "urgence": false,
+  "devis": {
+    "prix_ht": 1162.5,
+    "tva": 116.25,
+    "prix_ttc": 1278.75,
+    "lignes": [
+      {
+        "libelle": "Distance 465 km × 2,50 €/km",
+        "montant": 1162.5
+      },
+      {
+        "libelle": "TVA 10%",
+        "montant": 116.25
+      }
+    ],
+    "coefficients": [
+      {
+        "nom": "Mode Fallback Démo Local",
+        "valeur": 1
+      }
+    ],
+    "devise": "EUR"
+  }
+}
