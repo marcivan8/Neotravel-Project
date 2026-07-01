@@ -4,20 +4,44 @@
 ───────────────────────────────────────────── */
 
 :root {
-  /* ── Brand palette ── */
-  --nt-dark:        #2e3a1f;   /* dark forest green — headers, buttons */
-  --nt-dark-deep:   #1b2110;   /* cockpit sidebar, darkest bg */
-  --nt-lime:        #c2e84a;   /* lime accent — primary CTA */
-  --nt-lime-fg:     #1f2613;   /* text on lime buttons */
-  --nt-cream:       #f3f2ec;   /* page background */
-  --nt-cream-mid:   #f5f4ee;   /* nav / assistant page bg */
-  --nt-chat-bg:     #f7f6f0;   /* chat message list bg */
+  /* ── Official Brand Palette ── */
+  --olive:          #2e3a1f;   /* primaire */
+  --olive-dark:     #23280f;   /* fond icône */
+  --lime:           #c2e84a;   /* accent */
+  --cream:          #f3f2ec;   /* fond clair */
+  --ink:            #15180e;   /* texte */
+
+  /* ── Mapping to theme tokens ── */
+  --nt-dark:        var(--olive);
+  --nt-dark-deep:   var(--olive-dark);
+  --nt-lime:        var(--lime);
+  --nt-lime-fg:     var(--olive-dark); /* Dark text on light lime for contrast accessibility */
+  --nt-cream:       var(--cream);
+  --nt-cream-mid:   var(--cream);
+  --nt-chat-bg:     #f7f6f0;
   --nt-white:       #ffffff;
-  --nt-text:        #1b1f15;   /* primary text */
-  --nt-text-mid:    #565a4d;   /* body text */
-  --nt-text-muted:  #8a8f7d;   /* captions, meta */
+  --nt-text:        var(--ink);
+  --nt-text-mid:    var(--ink);
+  --nt-text-muted:  #5e6255;
   --nt-border:      rgba(46,58,31,0.1);
   --nt-border-mid:  rgba(46,58,31,0.16);
+
+  /* ── Cockpit Rôles de Texte & Surfaces (WCAG 2.1 AA) ── */
+  --nt-text-primary:    #1b1f15;   /* titres, valeurs, libellés clés — 14.9:1 sur crème */
+  --nt-text-secondary:  #3a4030;   /* paragraphes, descriptions — 9.5:1 */
+  --nt-text-discretion: #5f6452;   /* légendes, métadonnées, ≥14px — 6.0:1 */
+  --nt-text-on-olive:   #f3f2ec;   /* 10.8:1 */
+  --nt-text-on-citron:  #1f2613;   /* 11.1:1 */
+
+  --nt-bg-app:          #f5f1e8;   /* crème */
+  --nt-bg-card:         #fffdf8;   /* blanc cassé */
+  --nt-border-card:     #e7dcc6;   /* bordure */
+  --nt-thead-bg:        #faf6ec;   /* en-tête tableau */
+  --nt-row-border:      #efe6d3;   /* séparateur de lignes */
+
+  --nt-urgent-text:     #a9762a;   /* ambre */
+  --nt-urgent-bg:       #fdf1e1;   /* ambre fond */
+  --nt-urgent-border:   #f0d6a4;   /* ambre bordure */
 
   /* ── Amber escalation ── */
   --nt-amber:       #e8a13a;
@@ -26,7 +50,7 @@
   --nt-amber-text:  #6b4e1f;
 
   /* ── Ink (DA "Encre") — canonical title colour ── */
-  --nt-ink:         #15180e;
+  --nt-ink:         #000000;
 
   /* ── Semantic ── */
   --nt-success:     #3f9d5a;
@@ -95,8 +119,13 @@ html, body {
 
 /* ── Focus ring ── */
 *:focus-visible {
-  outline: 2px solid var(--nt-lime);
+  outline: 2.5px solid #6f8a2e;
   outline-offset: 2px;
+}
+
+aside *:focus-visible,
+.nt-dark-bg *:focus-visible {
+  outline-color: #c2e84a !important;
 }
 
 /* ── Placeholder ── */
@@ -107,7 +136,7 @@ input::placeholder, textarea::placeholder { color: #9aa090; }
 }
 .nt-form-input:focus {
   border-color: var(--nt-lime) !important;
-  box-shadow: 0 0 0 3px rgba(194, 232, 74, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(142, 163, 30, 0.2) !important;
 }
 
 /* ── Animations ── */

@@ -51,9 +51,9 @@ export default function DevisCard({ devis, onAccept, onModify, onConseiller }: P
           <span style={{
             fontSize: 11,
             fontWeight: 600,
-            color: '#c2e84a',
-            background: 'rgba(194,232,74,0.12)',
-            border: '1px solid rgba(194,232,74,0.25)',
+            color: 'var(--nt-dark)',
+            background: 'rgba(46,58,31,0.08)',
+            border: '1px solid rgba(46,58,31,0.18)',
             padding: '2px 8px',
             borderRadius: 6,
           }}>
@@ -138,8 +138,8 @@ export default function DevisCard({ devis, onAccept, onModify, onConseiller }: P
             fontFamily: 'inherit',
             fontSize: 13.5,
             fontWeight: 700,
-            color: '#1f2613',
-            background: '#c2e84a',
+            color: 'var(--nt-lime-fg)',
+            background: 'var(--nt-lime)',
             border: 'none',
             padding: '11px 14px',
             borderRadius: 11,

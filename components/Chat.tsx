@@ -172,36 +172,38 @@ export default function Chat({ seedMessage }: Props) {
       <div style={{
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         gap: 11,
-        padding: '14px 16px',
+        padding: '12px 16px',
         background: '#2e3a1f',
         color: '#f3f2ec',
         flexShrink: 0,
       }}>
-        <Image src="/logo-assistant-icon.svg" alt="Assistant NeoTravel" width={38} height={38} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>Assistant NeoTravel</div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Image src="/brand/png/neotravel-assistant-white.png" alt="Assistant NeoTravel" width={140} height={32} style={{ objectFit: 'contain' }} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#c2cbb4' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#7ed957', display: 'inline-block' }} />
-            En ligne · répond en quelques secondes
+            En ligne
           </div>
+          <button
+            onClick={handleReset}
+            style={{
+              fontFamily: 'inherit',
+              fontSize: 12,
+              color: '#f3f2ec',
+              background: 'transparent',
+              border: '1px solid rgba(243,242,236,0.25)',
+              padding: '6px 10px',
+              borderRadius: 9,
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            ↺ Réinitialiser
+          </button>
         </div>
-        <button
-          onClick={handleReset}
-          style={{
-            fontFamily: 'inherit',
-            fontSize: 12,
-            color: '#f3f2ec',
-            background: 'transparent',
-            border: '1px solid rgba(243,242,236,0.25)',
-            padding: '6px 10px',
-            borderRadius: 9,
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-        >
-          ↺ Réinitialiser
-        </button>
       </div>
 
       {/* ── Messages ── */}

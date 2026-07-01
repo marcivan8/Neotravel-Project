@@ -3,6 +3,14 @@ import * as path from 'path'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
+const IconPrinter = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <polyline points="6 9 6 2 18 2 18 9" />
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+    <rect width="12" height="8" x="6" y="14" />
+  </svg>
+)
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
@@ -41,7 +49,7 @@ export default async function DevisPage({ params }: PageProps) {
   })
 
   const isAllerRetour = !!devisData.aller_retour
-  const travelTypeStr = isAllerRetour ? 'Aller-retour 🔄' : 'Aller simple ➡️'
+  const travelTypeStr = isAllerRetour ? 'Aller-retour' : 'Aller simple'
   const distanceStr = devisData.distance_km ? `${devisData.distance_km} km` : '—'
   const vehicleStr = devisData.type_vehicule ? String(devisData.type_vehicule) : 'Autocar Standard'
   
@@ -51,7 +59,7 @@ export default async function DevisPage({ params }: PageProps) {
   }
 
   const costPerPerson = devisData.devis.cout_par_personne ?? (Math.round((devisData.devis.prix_ttc / (devisData.nb_passagers || 1)) * 100) / 100)
-  const pricingType = devisData.devis.type_tarification ?? 'Saison Basse 📉'
+  const pricingType = devisData.devis.type_tarification ?? 'Saison Basse'
 
   return (
     <div style={{ background: '#f5f5f3', minHeight: '100vh', padding: '32px 16px' }}>
@@ -140,12 +148,13 @@ export default async function DevisPage({ params }: PageProps) {
         <Link href="/" style={{ color: '#2e3a1f', fontSize: 14, fontWeight: 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
           ← Retour à l'accueil
         </Link>
-        <button 
+        <a 
           className="nt-devis-print-btn"
-          onClick={() => typeof window !== 'undefined' && window.print()}
+          href="javascript:window.print()"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}
         >
-          🖨️ Imprimer ou Enregistrer en PDF
-        </button>
+          <IconPrinter size={15} /> Imprimer ou Enregistrer en PDF
+        </a>
       </div>
 
       {/* Main Quote Card Document */}
@@ -155,7 +164,7 @@ export default async function DevisPage({ params }: PageProps) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #2e3a1f', paddingBottom: 28, marginBottom: 28 }}>
           <div>
             <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.5px', color: '#2e3a1f', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ background: '#c2e84a', width: 28, height: 28, borderRadius: 6, display: 'inline-block' }}></span>
+              <span style={{ background: '#8ea31e', width: 28, height: 28, borderRadius: 6, display: 'inline-block' }}></span>
               NeoTravel
             </div>
             <div style={{ color: '#616b57', fontSize: 13, marginTop: 4, lineHeight: 1.4 }}>

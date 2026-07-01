@@ -68,9 +68,7 @@ export const call_calculer_devis = tool({
         const key1 = `${o}-${d}`
         const key2 = `${d}-${o}`
         peages_cost = tollMap[key1] || tollMap[key2] || 0
-        if (params.aller_retour) {
-          peages_cost *= 2
-        }
+        // NB : le doublement A/R est géré dans calculer_devis_stub, pas ici
       }
 
       // ── Call pricing engine ──
@@ -82,6 +80,7 @@ export const call_calculer_devis = tool({
         type_vehicule:  params.type_vehicule,
         options:        params.options,
         peages_cost,
+        aller_retour:   params.aller_retour ?? false,
       })
 
       console.log(

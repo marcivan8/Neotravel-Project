@@ -119,8 +119,8 @@ export default function AssistantPage() {
               fontFamily: 'inherit',
               fontSize: 15,
               fontWeight: 700,
-              color: '#1f2613',
-              background: '#c2e84a',
+              color: 'var(--nt-lime-fg)',
+              background: 'var(--nt-lime)',
               border: 'none',
               padding: '13px 20px',
               borderRadius: 13,
@@ -210,7 +210,7 @@ export default function AssistantPage() {
                 padding: 14,
                 zIndex: 10,
               }}>
-                <span style={{ alignSelf: 'flex-start', fontSize: 11.5, fontWeight: 700, color: '#1f2613', background: '#c2e84a', padding: '3px 9px', borderRadius: 6 }}>
+                <span style={{ alignSelf: 'flex-start', fontSize: 11.5, fontWeight: 700, color: 'var(--nt-lime-fg)', background: 'var(--nt-lime)', padding: '3px 9px', borderRadius: 6 }}>
                   {card.tag}
                 </span>
                 <div>
@@ -229,8 +229,8 @@ export default function AssistantPage() {
                       cursor: 'pointer',
                       transition: 'background-color 0.2s ease',
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#c2e84a'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--nt-lime)'; e.currentTarget.style.color = 'var(--nt-lime-fg)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = '#1f2613'; }}
                   >
                     Planifier ce trajet →
                   </button>

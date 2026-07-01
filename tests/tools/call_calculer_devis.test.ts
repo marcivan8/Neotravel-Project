@@ -72,10 +72,10 @@ describe('call_calculer_devis — validation guards', () => {
     const devis = (result as any).devis
     expect(devis).toBeDefined()
 
-    // 100 km × 2.50 = 275 TTC
-    expect(devis.prix_ht).toBe(250)
-    expect(devis.tva).toBe(25)
-    expect(devis.prix_ttc).toBe(275)
+    // 100 km × 2.80 = 280 HT. August is high season (×1.25) -> 350 HT. 385 TTC
+    expect(devis.prix_ht).toBe(350)
+    expect(devis.tva).toBe(35)
+    expect(devis.prix_ttc).toBe(385)
   })
 
   it('echoes back the demande_id so downstream tools can chain on it', async () => {

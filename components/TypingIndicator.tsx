@@ -10,7 +10,20 @@ import Image from 'next/image'
 export default function TypingIndicator() {
   return (
     <div style={{ display: 'flex', gap: 9, alignItems: 'flex-end', alignSelf: 'flex-start' }}>
-      <Image src="/logo-assistant-icon.svg" alt="" width={27} height={27} style={{ borderRadius: '50%', flexShrink: 0 }} />
+      <div style={{ width: 27, height: 27, borderRadius: '50%', overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+        <img
+          src="/logo-assistant.png"
+          alt=""
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            height: '100%',
+            width: 'auto',
+            maxWidth: 'none',
+          }}
+        />
+      </div>
       <div style={{
         background: '#fff',
         border: '1px solid #e7e6dd',

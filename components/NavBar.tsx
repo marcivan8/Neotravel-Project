@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────
 
 import Link from 'next/link'
-import Image from 'next/image'
+import Logo from '@/components/Logo'
 
 interface Props {
   activePage?: 'landing' | 'assistant' | 'cockpit'
@@ -41,11 +41,8 @@ export default function NavBar({ activePage = 'landing' }: Props) {
       borderBottom: '1px solid rgba(46,58,31,0.1)',
     }}>
       {/* Logo */}
-      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: '#16190f' }}>
-        <Image src="/logo-neotravel-icon.svg" alt="" width={34} height={34} />
-        <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 700, fontSize: 22, letterSpacing: '-0.025em' }}>
-          NeoTravel
-        </span>
+      <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+        <Logo theme="light" height={40} />
       </Link>
 
       {/* Nav links */}
@@ -62,11 +59,14 @@ export default function NavBar({ activePage = 'landing' }: Props) {
           textDecoration: 'none',
           fontSize: 14,
           fontWeight: 700,
-          color: '#1f2613',
-          background: '#c2e84a',
+          color: 'var(--nt-lime-fg)',
+          background: 'var(--nt-lime)',
           padding: '10px 17px',
           borderRadius: 12,
+          transition: 'transform 0.2s',
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.03)')}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = 'none')}
       >
         Demander un devis
       </Link>

@@ -192,14 +192,16 @@ export async function updateOpportuniteStatus(
   recordId: string,
   statut: string
 ): Promise<void> {
-  const allowed = ['Refusé', 'En attente', 'Accepté']
+  const allowed = ['Refusé', 'En attente', 'Accepté', 'Devis Envoyé', 'En attente de calcul', 'Signé', 'Annulé']
   let mapped = statut
   if (!allowed.includes(statut)) {
     const s = statut.toLowerCase().trim()
-    if (s === 'accepté' || s === 'accepte') {
+    if (s === 'accepté' || s === 'accepte' || s === 'signé' || s === 'signe') {
       mapped = 'Accepté'
-    } else if (s === 'refusé' || s === 'refuse') {
+    } else if (s === 'refusé' || s === 'refuse' || s === 'annulé' || s === 'annule') {
       mapped = 'Refusé'
+    } else if (s === 'devis envoyé' || s === 'devis envoye' || s === 'envoyé' || s === 'envoye') {
+      mapped = 'Devis Envoyé'
     } else {
       mapped = 'En attente'
     }
@@ -241,12 +243,16 @@ export async function createDevis(
   })
 }
 
-/** @deprecated Use updateOpportuniteStatus() instead */
+/** Mark an Opportunite as "Devis Envoyé" and record the send date. */
 export async function markDevisSent(
   devisId: string,
   _isUrgent: boolean
 ): Promise<void> {
-  return updateOpportuniteStatus(devisId, 'Envoyé')
+  const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+  await updateRecord(TABLES.OPPORTUNITES, devisId, {
+    Statut_Devis:        'Devis Envoyé',
+    Date_Devis_Envoyé:   today,
+  })
 }
 
 // ── Cockpit-specific helpers ──────────────────
