@@ -1,112 +1,387 @@
-# NeoTravel — Agent Backend (P2)
+# NeoTravel — Agent IA Backend
 
-Vercel AI SDK agent that automates NeoTravel's commercial pipeline.
-Stack: Next.js (App Router) · TypeScript · Vercel AI SDK · Airtable · Resend
+Agent conversationnel développé avec le **Vercel AI SDK** permettant d'automatiser le processus commercial de NeoTravel :
+
+- qualification des prospects ;
+- génération automatique de devis ;
+- création des leads dans Airtable ;
+- génération du devis PDF ;
+- envoi automatique par email ;
+- mise à jour du pipeline commercial.
 
 ---
 
-## Setup
+# Sommaire
 
-### 1 — Prerequisites
-- Node.js 18+
-- A GitHub repo (push this folder to it)
-- Accounts on: OpenAI, Airtable, Resend, Vercel
+- Présentation
+- Fonctionnalités
+- Stack technique
+- Architecture
+- Installation
+- Variables d'environnement
+- Lancement
+- Tests
+- Structure du projet
+- Fonctionnement de l'agent
+- Outils disponibles
+- Pipeline commercial
+- Pricing
+- Déploiement
+- Développement
+- Observabilité
+- Limitations
+- Évolutions prévues
 
-### 2 — Install dependencies
+---
 
-```bash
-npx create-next-app@latest . --typescript --app --no-tailwind --no-eslint --src-dir no
-npm install ai @ai-sdk/openai zod
+# Présentation
+
+Ce projet implémente un agent IA chargé d'automatiser tout le cycle commercial de NeoTravel.
+
+L'objectif est de garantir que chaque devis soit :
+
+- cohérent ;
+- reproductible ;
+- traçable ;
+- calculé de manière déterministe.
+
+L'agent n'effectue jamais de calcul de prix lui-même.
+
+Toutes les opérations métier sont déléguées à des outils spécialisés.
+
+---
+
+# Fonctionnalités
+
+✅ Qualification conversationnelle
+
+✅ Collecte des informations du voyage
+
+✅ Création automatique du Lead
+
+✅ Calcul automatique du devis
+
+✅ Génération du PDF
+
+✅ Envoi du devis par email
+
+✅ Mise à jour du pipeline
+
+✅ Escalade vers un humain si nécessaire
+
+---
+
+# Stack technique
+
+| Technologie | Rôle |
+|-------------|------|
+| Next.js App Router | Backend |
+| TypeScript | Langage |
+| Vercel AI SDK | Agent IA |
+| OpenAI / Gemini | LLM |
+| Airtable | CRM |
+| Resend | Emails |
+| Vitest | Tests |
+
+---
+
+# Architecture générale
+
+```
+Prospect
+    │
+    ▼
+Chat UI
+    │
+    ▼
+API /api/chat
+    │
+    ▼
+Agent IA
+    │
+    ├── save_lead
+    ├── call_calculer_devis
+    ├── generate_pdf
+    ├── send_email
+    ├── update_status
+    └── escalate
 ```
 
-Then copy the files from this folder into your new Next.js project, preserving the folder structure.
+---
 
-### 4 — Environment variables
+# Installation
+
+## Prérequis
+
+- Node.js 20 LTS recommandé
+- npm
+- Compte Airtable
+- Compte Resend
+- Clé OpenAI ou Gemini
+
+## Installation
+
+```bash
+git clone <repo>
+
+cd neotravel-agent
+
+npm install
+```
+
+Créer ensuite le fichier :
 
 ```bash
 cp .env.example .env.local
-# Fill in the values in .env.local
 ```
 
-### 5 — Run locally
+---
+
+# Variables d'environnement
+
+```env
+OPENAI_API_KEY=
+
+GOOGLE_GENERATIVE_AI_API_KEY=
+
+AIRTABLE_API_KEY=
+
+AIRTABLE_BASE_ID=
+
+RESEND_API_KEY=
+
+EMAIL_FROM=
+
+INTERNAL_ALERT_EMAIL=
+```
+
+Au moins une clé LLM est nécessaire.
+
+---
+
+# Lancement
 
 ```bash
 npm run dev
-# Agent is live at http://localhost:3000/api/chat
 ```
 
-### 5 — Test the API
+API disponible sur
+
+```
+http://localhost:3000/api/chat
+```
+
+---
+
+# Test rapide
 
 ```bash
 curl -X POST http://localhost:3000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"messages": [{"role": "user", "content": "Bonjour"}]}'
-```
-
-You should see a streaming response.
-
-### 6 — Deploy to Vercel
-
-```bash
-git add . && git commit -m "feat: initial agent setup"
-git push
-# Vercel auto-deploys on push
-# Add env variables in Vercel dashboard → Project → Settings → Environment Variables
+-H "Content-Type: application/json" \
+-d '{"messages":[{"role":"user","content":"Bonjour"}]}'
 ```
 
 ---
 
-## Project structure
+# Tests
+
+Lancer tous les tests :
+
+```bash
+npm test
+```
+
+Mode watch :
+
+```bash
+npm run test:watch
+```
+
+---
+
+# Structure du projet
 
 ```
 app/
-  api/
-    chat/
-      route.ts          ← Main streaming endpoint (P2 owns)
+└── api/
+    └── chat/
+        └── route.ts
+
 lib/
-  system_prompt.ts      ← Agent persona and rules (P2 owns)
-  airtable.ts           ← Airtable REST helper (P2 owns)
-  tools/
-    index.ts            ← Tool registry
-    save_lead.ts        ← Creates a lead in Airtable
-    update_status.ts    ← Updates pipeline status
-    call_calculer_devis.ts  ← Pricing tool (stub until J4 — P5 delivers the real function)
-    generate_pdf.ts     ← PDF generation (stub until J5 — P5 delivers)
-    send_email.ts       ← Sends quote via Resend
-    escalate.ts         ← HITL escalation
+├── airtable.ts
+├── pricing.ts
+├── fallback_parser.ts
+├── system_prompt.ts
+└── tools/
+    ├── save_lead.ts
+    ├── call_calculer_devis.ts
+    ├── generate_pdf.ts
+    ├── send_email.ts
+    ├── update_status.ts
+    └── escalate.ts
+
+tests/
 types/
-  index.ts              ← Shared TypeScript types
 ```
 
 ---
 
-## Integration points
+# Fonctionnement
 
-| What | Who | When |
-|------|-----|-------|
-| Airtable table schema + field names | P4 | J1 — must sync before coding tools |
-| `calculer_devis()` function | P5 | J4 — replace stub in `call_calculer_devis.ts` |
-| PDF generator function | P5 | J5 — replace stub in `generate_pdf.ts` |
-| Chat UI connecting to `/api/chat` | P3 | J3 — must confirm streaming format |
+L'agent suit toujours le même workflow :
 
----
-
-## Replacing the pricing stub (J4)
-
-When P5 delivers `calculer_devis()`, open `lib/tools/call_calculer_devis.ts` and:
-
-1. Replace the stub function with the real import:
-   ```ts
-   import { calculer_devis } from '@/lib/pricing/calculer_devis'
-   ```
-2. Replace the `calculer_devis_stub(...)` call with `calculer_devis(...)`
-3. Run the unit tests P5 provides to confirm it works
+1. Comprendre la demande
+2. Extraire les informations
+3. Sauvegarder le lead
+4. Calculer le devis
+5. Générer le PDF
+6. Envoyer le mail
+7. Mettre à jour le pipeline
 
 ---
 
-## Key rules (do not break)
+# Outils disponibles
 
-- **Never calculate a price outside `call_calculer_devis`.** The LLM never does arithmetic.
-- **Always log tool calls** (`console.log` in each tool's `execute` function).
-- **`maxSteps: 8`** allows the agent to chain tools (save → price → pdf → email) in one response.
-- **`temperature: 0.2`** keeps data extraction reliable. Do not raise above 0.5.
+| Outil | Description |
+|--------|-------------|
+| save_lead | Création du prospect |
+| call_calculer_devis | Calcul du prix |
+| generate_pdf | Génération du devis |
+| send_email | Envoi email |
+| update_status | Mise à jour CRM |
+| escalate | Escalade humaine |
+
+---
+
+# Pricing
+
+⚠️ Règle importante :
+
+Le LLM ne calcule jamais un prix.
+
+Le calcul est exclusivement réalisé par :
+
+```
+call_calculer_devis
+```
+
+Le moteur actuel utilise un stub qui sera remplacé par le moteur de pricing complet.
+
+---
+
+# Pipeline commercial
+
+Le pipeline comporte plusieurs statuts :
+
+- Nouveau
+- Incomplet
+- Qualifié
+- Devis envoyé
+- Relance 1
+- Relance 2
+- Accepté
+- Refusé
+- Cas complexe
+- Clôturé
+
+---
+
+# Développement
+
+## Ajouter un nouvel outil
+
+1. Créer le fichier dans :
+
+```
+lib/tools/
+```
+
+2. Exporter l'outil.
+
+3. Ajouter l'import dans
+
+```
+tools/index.ts
+```
+
+---
+
+## Remplacer le moteur de pricing
+
+Lorsque le moteur définitif est disponible :
+
+```ts
+import { calculer_devis } from "@/lib/pricing";
+```
+
+à la place de :
+
+```ts
+calculer_devis_stub()
+```
+
+---
+
+# Observabilité
+
+Chaque exécution de l'agent doit produire des logs permettant de tracer :
+
+- les appels outils ;
+- les erreurs ;
+- le temps de génération ;
+- le coût LLM ;
+- le coût du devis ;
+- les informations de pricing.
+
+---
+
+# Bonnes pratiques
+
+- Ne jamais calculer un prix dans le prompt.
+- Toujours utiliser les outils.
+- Toujours journaliser les appels.
+- Conserver `temperature: 0.2`.
+- Utiliser `maxSteps: 8`.
+
+---
+
+# Déploiement
+
+Le projet est prévu pour être déployé sur Vercel.
+
+```bash
+git add .
+
+git commit -m "feat"
+
+git push
+```
+
+Configurer ensuite les variables d'environnement dans Vercel.
+
+---
+
+# Limitations connues
+
+- moteur de pricing simplifié ;
+- distance estimée ;
+- PDF basique ;
+- absence d'authentification ;
+- limite Airtable.
+
+---
+
+# Roadmap
+
+- moteur de pricing complet ;
+- calcul réel via API cartographique ;
+- support multi-autocars ;
+- tableau de bord ;
+- authentification ;
+- signature électronique.
+
+---
+
+# Documentation
+
+La documentation complète du projet (architecture, moteur de pricing, pipeline commercial, workflow, tests et évolutions) est disponible dans le document de passation du projet. :contentReference[oaicite:1]{index=1}
