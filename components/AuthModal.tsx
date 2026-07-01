@@ -152,10 +152,21 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: Props) {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+            <img
+              src="/brand/svg/neotravel-logo.svg"
+              alt="NeoTravel"
+              height={48}
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+          {/* Divider */}
+          <div style={{ height: 1, background: 'rgba(46,58,31,0.08)', marginBottom: 20 }} />
           <h2
             style={{
               fontFamily: "'Bricolage Grotesque', sans-serif",
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: 700,
               color: '#15180e',
               margin: '0 0 6px',
@@ -163,10 +174,10 @@ export default function AuthModal({ mode, onClose, onSwitchMode }: Props) {
           >
             {mode === 'login' ? 'Connexion' : 'Créer un compte'}
           </h2>
-          <p style={{ fontSize: 14, color: '#565a4d', margin: 0 }}>
+          <p style={{ fontSize: 13.5, color: '#565a4d', margin: 0 }}>
             {mode === 'login'
-              ? 'Accédez à vos devis et à l’assistant NeoTravel'
-              : 'Rejoignez-nous pour organiser votre trajet de groupe'}
+              ? "Accédez à vos devis et à l'assistant NeoTravel"
+              : "Rejoignez-nous pour organiser votre trajet de groupe"}
           </p>
         </div>
 
