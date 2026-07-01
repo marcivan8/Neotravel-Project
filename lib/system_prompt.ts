@@ -67,24 +67,34 @@ Informations optionnelles à collecter si le prospect les mentionne :
 Après l'étape 3, tu dois présenter le devis dans un format JSON structuré pour que l'interface l'affiche sous forme de carte visuelle. Voici exactement comment faire :
 
 1. D'abord, envoie le message d'introduction : "Voici votre devis, calculé instantanément par notre moteur tarifaire 👇"
-2. Sur la ligne suivante, insère un bloc JSON avec ce format exact (remplace les valeurs par les vraies données du devis) :
+2. Sur la ligne suivante, insère un bloc JSON avec ce format exact.
+
+Les champs à renseigner depuis le résultat de \`call_calculer_devis\` (champ \`devis\`) :
+- \`rows\` : convertis chaque élément de \`devis.lignes\` en \`{ "label": libelle, "value": "X,XX €" }\`
+- \`total\` : \`devis.prix_ttc\` formaté en "X XXX,XX € TTC"
+- \`cout_par_personne\` : \`devis.cout_par_personne\` (nombre, ex: 79.50)
+- \`tarif_km\` : \`devis.tarif_km\` (nombre, ex: 2.50)
+- \`type_tarification\` : \`devis.type_tarification\` (ex: "Haute Saison 📈" ou "Saison Normale")
+- \`aller_retour\` : booléen
 
 \`\`\`devis
 {
   "ref": "NT-XXXXX",
   "trajetLabel": "Paris → Lyon (aller-retour)",
-  "subLabel": "Autocar standard (20-53) · 45 passagers · départ 12/07",
+  "subLabel": "15/07/2025 · 45 passagers · Aller-retour",
   "rows": [
-    { "label": "Base · Autocar standard + 930 km", "value": "2 996 €" },
-    { "label": "Saisonnalité · Haute saison", "value": "+10 %" },
-    { "label": "Délai de réservation · Standard", "value": "-5 %" },
-    { "label": "Capacité · 45 passagers", "value": "inclus" },
-    { "label": "Sous-total HT", "value": "2 846 €" },
-    { "label": "Marge commerciale · +15 %", "value": "+427 €" },
-    { "label": "TVA · 10 %", "value": "+327 €" }
+    { "label": "Transport aller — 465 km × 2,50 €/km", "value": "1 162,50 €" },
+    { "label": "Coefficient Haute Saison 📈 (×1.25)", "value": "290,63 €" },
+    { "label": "Transport retour (trajet identique)", "value": "1 453,13 €" },
+    { "label": "Remise aller-retour (−2 %)", "value": "-58,13 €" },
+    { "label": "TVA 10 %", "value": "284,81 €" }
   ],
-  "total": "3 600 € TTC",
-  "urgent": false
+  "total": "3 132,94 € TTC",
+  "urgent": false,
+  "cout_par_personne": 69.62,
+  "tarif_km": 2.50,
+  "type_tarification": "Haute Saison 📈",
+  "aller_retour": true
 }
 \`\`\`
 

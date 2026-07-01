@@ -59,6 +59,12 @@ export const save_lead = tool({
           distance_km:      0,   // placeholder — updated after calculer_devis
           prix_total:       0,   // placeholder — updated after calculer_devis
           urgence:          params.urgence ? 'Urgente' : 'Normale',
+          // Journey details — stored once columns are created in Airtable
+          origine:          params.origine,
+          destination:      params.destination,
+          date_depart:      params.date_depart,
+          aller_retour:     false,
+          type_vehicule:    params.type_vehicule,
         })
       } catch (oppErr) {
         // Non-fatal: log and continue. The quote pipeline can still proceed

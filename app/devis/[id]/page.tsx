@@ -163,11 +163,9 @@ export default async function DevisPage({ params }: PageProps) {
         {/* Header Block */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #2e3a1f', paddingBottom: 28, marginBottom: 28 }}>
           <div>
-            <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.5px', color: '#2e3a1f', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ background: '#8ea31e', width: 28, height: 28, borderRadius: 6, display: 'inline-block' }}></span>
-              NeoTravel
-            </div>
-            <div style={{ color: '#616b57', fontSize: 13, marginTop: 4, lineHeight: 1.4 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/svg/neotravel-logo.svg" alt="NeoTravel" height={44} style={{ objectFit: 'contain', display: 'block', marginBottom: 8 }} />
+            <div style={{ color: '#616b57', fontSize: 13, lineHeight: 1.4 }}>
               Transport touristique & Voyages de groupes<br />
               142 Rue de Rivoli, 75001 Paris<br />
               devis@neotravel.fr · +33 1 84 60 70 80

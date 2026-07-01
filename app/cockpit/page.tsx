@@ -130,6 +130,10 @@ interface Lead {
   relanceStep?: number
   airtableId?: string
   prixTotal?: number
+  // Real fields from Airtable (populated once columns are added to Opportunites)
+  typeVehicule?: string
+  email?: string
+  telephone?: string
 }
 
 // ── Mock data ──────────────────────────────────
@@ -956,11 +960,13 @@ export default function CockpitPage() {
                   {[
                     ['Trajet', renderTrajet(drawerLead.from, drawerLead.to)],
                     ['Direction', drawerLead.ar ? <span style={{ display:'inline-flex', alignItems:'center', gap:5 }}>Aller-retour <IconRefreshCw size={13} /></span> : <span style={{ display:'inline-flex', alignItems:'center', gap:5 }}>Aller simple <IconArrowRight size={13} /></span>],
-                    ['Passagers', `${drawerLead.pax} personnes`],
+                    ['Passagers', drawerLead.pax ? `${drawerLead.pax} personnes` : '—'],
                     ['Date départ', drawerLead.dateDepart],
-                    ['Source', drawerLead.source],
+                    ['Véhicule', drawerLead.typeVehicule || '—'],
                     ['Urgence', drawerLead.urgent ? <span style={{ display:'inline-flex', alignItems:'center', gap:4, color:'var(--nt-urgent-text)', fontWeight:700 }}><IconZap size={13} /> Oui</span> : 'Non'],
                     ['Options', drawerLead.options.join(', ')||'—'],
+                    ['Email', drawerLead.email || '—'],
+                    ['Téléphone', drawerLead.telephone || '—'],
                   ].map(([k,v]) => (
                     <div key={String(k)} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, padding:'9px 0', borderBottom:'1px solid var(--nt-row-border)' }}>
                       <span style={{ fontSize:13, color:'var(--nt-text-discretion)' }}>{k}</span>
@@ -988,9 +994,9 @@ export default function CockpitPage() {
 
               {/* Summary */}
               <div>
-                <div style={{ fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'var(--nt-text-secondary)', marginBottom:10 }}>Conversation (résumé IA)</div>
-                <div style={{ background:'var(--nt-bg-card)', border:'1px solid var(--nt-border-card)', borderRadius:12, padding:'14px 16px', fontSize:13, lineHeight:1.55, color:'var(--nt-text-secondary)', fontStyle:'italic' }}>
-                  &ldquo;{drawerLead.summary}&rdquo;
+                <div style={{ fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'var(--nt-text-secondary)', marginBottom:10 }}>Résumé</div>
+                <div style={{ background:'var(--nt-bg-card)', border:'1px solid var(--nt-border-card)', borderRadius:12, padding:'14px 16px', fontSize:13, lineHeight:1.55, color:'var(--nt-text-secondary)' }}>
+                  {drawerLead.summary}
                 </div>
               </div>
             </div>

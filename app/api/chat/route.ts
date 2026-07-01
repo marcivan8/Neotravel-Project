@@ -80,10 +80,6 @@ export async function POST(req: Request) {
     const key1 = `${origine.toLowerCase()}-${destination.toLowerCase()}`
     const key2 = `${destination.toLowerCase()}-${origine.toLowerCase()}`
     let estDist = distMap[key1] || distMap[key2] || 350
-    if (aller_retour) {
-      estDist *= 2
-    }
-
     const tollMap: Record<string, number> = {
       'paris-versailles': 0,     'paris-annecy': 70,       'paris-la baule': 55,
       'paris-avignon': 95,       'paris-bruxelles': 25,     'paris-saint-émilion': 75,
@@ -91,19 +87,18 @@ export async function POST(req: Request) {
       'marseille-toulouse': 45,  'lyon-marseille': 35,      'paris-marseille': 90,
       'paris-lille': 20,         'bordeaux-toulouse': 25,
     }
-    let peages_cost = tollMap[key1] || tollMap[key2] || 0
-    if (aller_retour) {
-      peages_cost *= 2
-    }
+    // peages_cost = montant aller simple — calculer_devis_stub double automatiquement pour A/R
+    const peages_cost = tollMap[key1] || tollMap[key2] || 0
 
     const devisResult = calculer_devis_stub({
       nb_passagers,
       date_depart,
       date_demande: new Date().toISOString().split('T')[0],
-      distance_km: estDist,
+      distance_km: estDist,   // distance aller simple — le moteur gère le doublement A/R
       type_vehicule: 'Standard',
       options: [],
       peages_cost,
+      aller_retour,
     })
     const { prix_ht, tva, prix_ttc } = devisResult
 
@@ -159,23 +154,26 @@ export async function POST(req: Request) {
       console.warn('[mock] Could not write devis file:', fsErr)
     }
 
+    const formatEur = (n: number) => n.toFixed(2).replace('.', ',') + ' €'
+    const devisJson = JSON.stringify({
+      ref: devisId,
+      trajetLabel: `${origine} → ${destination}${aller_retour ? ' (aller-retour)' : ''}`,
+      subLabel: `${date_depart.split('-').reverse().join('/')} · ${nb_passagers} passagers · ${aller_retour ? 'Aller-retour' : 'Aller simple'}`,
+      rows: devisResult.lignes.map(l => ({ label: l.libelle, value: formatEur(l.montant) })),
+      total: `${prix_ttc.toFixed(2).replace('.', ',')} € TTC`,
+      urgent: false,
+      cout_par_personne: devisResult.cout_par_personne,
+      tarif_km: devisResult.tarif_km,
+      type_tarification: devisResult.type_tarification,
+      aller_retour,
+    }, null, 2)
+
     const textResponse = `Bonjour ! J'ai qualifié votre demande de transport.
 
 Voici le devis calculé pour votre voyage de groupe :
 
 \`\`\`devis
-{
-  "ref": "${devisId}",
-  "trajetLabel": "${origine} → ${destination}${aller_retour ? ' (aller-retour)' : ''}",
-  "subLabel": "${date_depart.split('-').reverse().join('/')} · ${nb_passagers} passagers · ${aller_retour ? 'Aller-retour' : 'Aller simple'}",
-  "rows": [
-    { "label": "Transport de base (${estDist} km)", "value": "${(estDist * 2.5).toFixed(2)} € HT" },
-    ${peages_cost > 0 ? `{ "label": "Frais de péages d'autoroute", "value": "${peages_cost.toFixed(2)} € HT" },` : ''}
-    { "label": "TVA 10%", "value": "${tva.toFixed(2)} €" }
-  ],
-  "total": "${prix_ttc.toFixed(2)} € TTC",
-  "urgent": false
-}
+${devisJson}
 \`\`\`
 
 Vous pouvez cliquer sur "Accepter le devis" ci-dessous ou me demander des ajustements.`

@@ -8,6 +8,7 @@
 
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 type FormState = 'idle' | 'loading' | 'success' | 'error'
 
@@ -109,14 +110,19 @@ export default function FormPage() {
 
       {/* Header */}
       <header style={{
-        background: 'var(--nt-green)', padding: '14px 20px',
-        display: 'flex', alignItems: 'center', gap: 10,
+        background: 'var(--nt-green)', padding: '12px 20px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Link href="/" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, textDecoration: 'none' }}>
-          ← Retour au chat
+        <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <Logo theme="dark" height={36} />
         </Link>
-        <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-        <span style={{ color: '#fff', fontSize: 14, fontWeight: 500 }}>Formulaire de demande</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Link href="/" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, textDecoration: 'none' }}>
+            ← Retour au chat
+          </Link>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <span style={{ color: '#fff', fontSize: 14, fontWeight: 500 }}>Formulaire de demande</span>
+        </div>
       </header>
 
       <div className="nt-fade-up" style={{ maxWidth: 560, margin: '32px auto', padding: '0 16px 40px' }}>

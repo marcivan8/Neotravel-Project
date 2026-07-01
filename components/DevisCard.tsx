@@ -13,6 +13,10 @@ export interface DevisData {
   rows: { label: string; value: string }[]
   total: string
   urgent: boolean
+  cout_par_personne?: number
+  tarif_km?: number
+  type_tarification?: string
+  aller_retour?: boolean
 }
 
 interface Props {
@@ -101,11 +105,51 @@ export default function DevisCard({ devis, onAccept, onModify, onConseiller }: P
           paddingTop: 12,
           borderTop: '2px solid #2e3a1f',
         }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#15180e' }}>Total</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#15180e' }}>Total TTC</span>
           <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 700, fontSize: 21, color: '#15180e' }}>
             {devis.total}
           </span>
         </div>
+
+        {/* Prix par personne */}
+        {devis.cout_par_personne !== undefined && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginTop: 5,
+          }}>
+            <span style={{ fontSize: 12.5, color: '#6b6f63' }}>Prix par personne</span>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: '#5b5f52' }}>
+              {devis.cout_par_personne.toFixed(2).replace('.', ',')} € TTC/pers.
+            </span>
+          </div>
+        )}
+
+        {/* Tarif details */}
+        {(devis.tarif_km !== undefined || devis.type_tarification) && (
+          <div style={{ marginTop: 8, display: 'flex', gap: 5, flexWrap: 'wrap' as const }}>
+            {devis.tarif_km !== undefined && (
+              <span style={{
+                fontSize: 11, color: '#6b6f63',
+                background: '#f6f5ec', border: '1px solid #e2e0d4',
+                padding: '2px 8px', borderRadius: 20,
+              }}>
+                {devis.tarif_km.toFixed(2).replace('.', ',')} €/km
+              </span>
+            )}
+            {devis.type_tarification && (
+              <span style={{
+                fontSize: 11, color: '#6b6f63',
+                background: '#f6f5ec', border: '1px solid #e2e0d4',
+                padding: '2px 8px', borderRadius: 20,
+              }}>
+                {devis.type_tarification}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Urgent badge */}
         {devis.urgent && (

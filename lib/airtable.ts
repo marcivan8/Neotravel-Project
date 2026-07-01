@@ -173,10 +173,16 @@ export async function createOpportunite(
     prix_total: number
     urgence?: 'Normale' | 'Urgente'
     saison?: string
+    // Journey details (require manual column creation in Airtable Opportunites table)
+    origine?: string
+    destination?: string
+    date_depart?: string       // YYYY-MM-DD
+    aller_retour?: boolean
+    type_vehicule?: string
   }
 ): Promise<string> {
   const record = await createRecord(TABLES.OPPORTUNITES, {
-    Lien_Lead:          [leadRecordId],   // Airtable linked record format
+    Lien_Lead:          [leadRecordId],
     Nombre_Passagers:   fields.nombre_passagers,
     Distance_KM:        fields.distance_km,
     Prix_Total:         fields.prix_total,
@@ -184,6 +190,26 @@ export async function createOpportunite(
     Urgence:            fields.urgence ?? 'Normale',
     Saison:             fields.saison || undefined,
   })
+
+  // Write journey details in a separate call — these fields need to be created
+  // manually in Airtable (Origine, Destination, Date_Depart, Aller_Retour, Type_Vehicule).
+  // This call fails silently until the columns exist.
+  if (fields.origine || fields.destination || fields.date_depart) {
+    const journeyFields: Record<string, unknown> = {}
+    if (fields.origine)     journeyFields['Origine']       = fields.origine
+    if (fields.destination) journeyFields['Destination']   = fields.destination
+    if (fields.date_depart) journeyFields['Date_Depart']   = fields.date_depart
+    if (fields.aller_retour !== undefined) journeyFields['Aller_Retour'] = fields.aller_retour
+    if (fields.type_vehicule) journeyFields['Type_Vehicule'] = fields.type_vehicule
+
+    try {
+      await updateRecord(TABLES.OPPORTUNITES, record.id, journeyFields)
+    } catch (err) {
+      // Columns not yet created in Airtable — safe to ignore until Marc adds them
+      console.warn('[createOpportunite] Journey fields not saved (columns missing?):', err)
+    }
+  }
+
   return record.id
 }
 
@@ -280,17 +306,36 @@ function mapCockpitStatusToAirtable(status: string): string {
 }
 
 export async function getLeadsForCockpit(): Promise<any[]> {
-  // Fetch all leads and opportunities (max 100 each for Cockpit overview)
-  const leads = await queryRecords(TABLES.LEADS, undefined, 100)
-  const opps = await queryRecords(TABLES.OPPORTUNITES, undefined, 100)
+  // Fetch leads, opportunites, and relances in parallel
+  const [leads, opps, relances] = await Promise.all([
+    queryRecords(TABLES.LEADS, undefined, 100),
+    queryRecords(TABLES.OPPORTUNITES, undefined, 100),
+    queryRecords(TABLES.RELANCES, undefined, 200).catch(() => [] as any[]),
+  ])
 
   // Map opportunities by lead ID
   const oppsByLeadId: Record<string, any> = {}
   for (const opp of opps) {
-    const leadIds = opp.fields.Lien_Lead as string[] | undefined
-    if (leadIds && leadIds.length > 0) {
-      for (const leadId of leadIds) {
-        oppsByLeadId[leadId] = opp
+    const linkedLeads = opp.fields.Lien_Lead as any[] | undefined
+    if (linkedLeads && linkedLeads.length > 0) {
+      for (const link of linkedLeads) {
+        // Airtable REST returns linked records as strings (record IDs)
+        const leadId = typeof link === 'string' ? link : (link as any).id
+        if (leadId) oppsByLeadId[leadId] = opp
+      }
+    }
+  }
+
+  // Map relances by lead ID (most recent first)
+  const relancesByLeadId: Record<string, any[]> = {}
+  for (const rel of relances) {
+    const linkedLeads = rel.fields.Lead_ID as any[] | undefined
+    if (linkedLeads && linkedLeads.length > 0) {
+      for (const link of linkedLeads) {
+        const leadId = typeof link === 'string' ? link : (link as any).id
+        if (!leadId) continue
+        if (!relancesByLeadId[leadId]) relancesByLeadId[leadId] = []
+        relancesByLeadId[leadId].push(rel)
       }
     }
   }
@@ -300,67 +345,85 @@ export async function getLeadsForCockpit(): Promise<any[]> {
     const leadIdNum = lead.fields.Lead_ID ? Number(lead.fields.Lead_ID) : 0
     const ref = leadIdNum ? `L-${leadIdNum}` : `L-${lead.id.slice(-4).toUpperCase()}`
 
-    const nom = String(lead.fields.Nom_Client || 'Sans nom')
-    const email = String(lead.fields.Email_Client || '')
+    const nom   = String(lead.fields.Nom_Client   || 'Sans nom')
+    const email = String(lead.fields.Email_Client  || '')
     const telephone = String(lead.fields.Telephone_Client || '')
 
-    let status = mapAirtableStatusToCockpit(String(lead.fields.Statut || 'Nouveau'))
-    if (status === 'qualifie' && opp && opp.fields.Statut_Devis === 'En attente') {
-      status = 'relance'
+    // ── Journey fields from Opportunite (real Airtable data when columns exist) ──
+    const origine      = opp?.fields.Origine      ? String(opp.fields.Origine)      : ''
+    const destination  = opp?.fields.Destination  ? String(opp.fields.Destination)  : ''
+    const from         = origine.toLowerCase()      || '—'
+    const to           = destination.toLowerCase()  || '—'
+
+    // Date_Depart: stored as YYYY-MM-DD in Airtable
+    let dateDepart = '—'
+    let month = new Date().getMonth() + 1
+    if (opp?.fields.Date_Depart) {
+      const d = new Date(String(opp.fields.Date_Depart))
+      if (!isNaN(d.getTime())) {
+        dateDepart = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+        month = d.getMonth() + 1
+      }
     }
 
-    const pax = opp?.fields.Nombre_Passagers ? Number(opp.fields.Nombre_Passagers) : 35
-    const prixTotal = opp?.fields.Prix_Total ? Number(opp.fields.Prix_Total) : 0
-    const urgent = opp?.fields.Urgence === 'Urgente'
+    const ar = opp?.fields.Aller_Retour === true
+    const typeVehicule = opp?.fields.Type_Vehicule ? String(opp.fields.Type_Vehicule) : 'Standard'
 
-    // Deterministic fields for data not stored in Airtable columns
-    const hash = leadIdNum || lead.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    // ── Statut mapping ──
+    let status = mapAirtableStatusToCockpit(String(lead.fields.Statut || 'Nouveau'))
+    const statutDevis = opp?.fields.Statut_Devis
+      ? String((opp.fields.Statut_Devis as any)?.name || opp.fields.Statut_Devis)
+      : ''
+    if (status === 'qualifie' && statutDevis === 'En attente') {
+      status = 'relance'
+    }
+    if (statutDevis === 'Devis Envoyé') status = 'devis_envoye'
 
-    const createdDate = lead.fields.Date_Creation ? new Date(String(lead.fields.Date_Creation)) : new Date()
-    const depDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000)
-    const dateDepart = `${String(depDate.getDate()).padStart(2, '0')}/${String(depDate.getMonth() + 1).padStart(2, '0')}`
-    const month = depDate.getMonth() + 1
+    const pax      = opp?.fields.Nombre_Passagers ? Number(opp.fields.Nombre_Passagers) : 0
+    const prixTotal = opp?.fields.Prix_Total       ? Number(opp.fields.Prix_Total)       : 0
+    const urgent   = String((opp?.fields.Urgence as any)?.name || opp?.fields.Urgence || '') === 'Urgente'
 
-    const cities = ['Paris', 'Lyon', 'Marseille', 'Lille', 'Bordeaux', 'Nantes', 'Strasbourg', 'Toulouse', 'Nice', 'Rennes']
-    const fromIndex = hash % cities.length
-    const toIndex = (hash + 3) % cities.length
-    const from = cities[fromIndex].toLowerCase()
-    const to = cities[toIndex === fromIndex ? (toIndex + 1) % cities.length : toIndex].toLowerCase()
+    // ── Relances from Airtable Relances table ──
+    const leadRelances = relancesByLeadId[lead.id] || []
+    const relanceFaites = leadRelances.filter(
+      (r) => String((r.fields.Statut_Relance as any)?.name || r.fields.Statut_Relance || '') === 'Fait'
+    ).length
+    const relanceStep = status === 'relance' || status === 'devis_envoye'
+      ? Math.min(relanceFaites, 2)
+      : undefined
 
-    const types = ['École', 'Entreprise', 'Club sportif', 'Association', 'Collectivité']
-    const type = types[hash % types.length]
+    const contact = nom
+    const options: string[] = []
 
-    const contact = lead.fields.Nom_Client ? String(lead.fields.Nom_Client) : 'Inconnu'
-    const ar = hash % 2 === 0
-    const options = hash % 3 === 0 ? ['Guide / accompagnateur'] : hash % 5 === 0 ? ['Nuit chauffeur'] : []
-    const complexite = lead.fields.Statut === 'Cas complexe' ? 'complexe' : hash % 7 === 0 ? 'simple' : 'standard'
+    const createdDate = lead.fields.Date_Creation
+      ? new Date(String(lead.fields.Date_Creation))
+      : new Date()
 
-    const summary = `Demande d'autocar pour le trajet ${from.toUpperCase()} → ${to.toUpperCase()}. Enregistré le ${createdDate.toLocaleDateString('fr-FR')}. Contact : ${email} / ${telephone}.`
+    // Build summary from real data
+    const trajetStr = (origine && destination) ? `${origine} → ${destination}` : 'trajet non renseigné'
+    const summary = `${nom} — ${trajetStr}. Enregistré le ${createdDate.toLocaleDateString('fr-FR')}. ${email}${telephone ? ` / ${telephone}` : ''}.`
 
-    const diffMs = new Date().getTime() - createdDate.getTime()
+    const diffMs  = Date.now() - createdDate.getTime()
     const diffMin = Math.max(1, Math.floor(diffMs / 60000))
     let lastAgo = `il y a ${diffMin} min`
     if (diffMin >= 60) {
-      const diffHours = Math.floor(diffMin / 60)
-      lastAgo = `il y a ${diffHours} h`
-      if (diffHours >= 24) {
-        const diffDays = Math.floor(diffHours / 24)
-        lastAgo = `il y a ${diffDays} j`
-      }
+      const h = Math.floor(diffMin / 60)
+      lastAgo = `il y a ${h} h`
+      if (h >= 24) lastAgo = `il y a ${Math.floor(h / 24)} j`
     }
 
     return {
       ref,
       client: nom,
-      type,
+      type: '—',           // not stored in Airtable
       from,
       to,
       pax,
       dateDepart,
       month,
-      jours: 30,
-      source: hash % 2 === 0 ? 'SEO' : hash % 3 === 0 ? 'Google Ads' : 'Direct',
-      complexite,
+      jours: 1,
+      source: '—',         // not stored in Airtable
+      complexite: 'standard',
       statut: status,
       urgent,
       ar,
@@ -368,9 +431,12 @@ export async function getLeadsForCockpit(): Promise<any[]> {
       contact,
       summary,
       lastAgo,
-      relanceStep: status === 'relance' ? (hash % 2 === 0 ? 1 : 2) : undefined,
+      relanceStep,
       airtableId: lead.id,
       prixTotal,
+      typeVehicule,
+      email,
+      telephone,
     }
   })
 }

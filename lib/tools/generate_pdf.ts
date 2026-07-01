@@ -33,6 +33,10 @@ export const generate_pdf = tool({
           z.object({ nom: z.string(), valeur: z.number() })
         ),
         devise: z.literal('EUR'),
+        cout_par_personne: z.number().optional(),
+        tarif_km: z.number().optional(),
+        type_tarification: z.string().optional(),
+        aller_retour: z.boolean().optional(),
       })
       .describe('The full devis result from call_calculer_devis'),
   }),
